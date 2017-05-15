@@ -1,0 +1,23 @@
+mon qwk_bpm3h09X
+mon qwk_bpm3h04X
+mon qwk_bpm3c12X
+mon qwk_bpm3h09Y
+mon qwk_bpm3h04Y
+
+det qwk_targetX
+det qwk_targetXSlope
+det qwk_targetY
+det qwk_targetYSlope
+det qwk_bpm3c14X
+det qwk_bpm3c14Y
+det qwk_bpm3h02X
+det qwk_bpm3h02Y
+det qwk_bpm3p02aX
+det qwk_bpm3p02aY
+det qwk_bpm3p02bX
+det qwk_bpm3p02bY
+det qwk_bpm3p03aX
+det qwk_bpm3p03aY
+det qwk_bpm3h09bX
+det qwk_bpm3h09bY
+det qwk_bpm3c11X

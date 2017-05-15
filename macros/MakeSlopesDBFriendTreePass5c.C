@@ -1,0 +1,271 @@
+#include <TChain.h>
+#include <cstdio>
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <vector>
+#include "TSystem.h"
+#include "TFile.h"
+#include "TROOT.h"
+#include "TTree.h"
+#include "TChain.h"
+#include "TBranch.h"
+#include "TLeaf.h"
+#include "TDirectory.h"
+
+//////////////////////////////////////////////////////////////////////////////
+//Author: Don Jones
+//Date: April 8, 2014
+//Program gets average slopes from files to produce a slopes summary rootfile  
+//friendable to Wade's DB rootfiles.
+//
+//**********************************************************************
+//Run this using script MakeSlopesDBFriendTree.sh which will produce the 
+//requisite run range list before running this program.
+//**********************************************************************
+///////////////////////////////////////////////////////////////////////////////
+
+struct leaf_t{
+  double value;
+  double err;
+  double rms;
+  int n;
+};
+
+//Declare constants
+/////////////////////////////////////////////////////////
+const Int_t nDET = 100, nMON = 5, nMOD = 5, nCOIL = 10;
+const Double_t  ERROR = -999999, DegToRad = 0.0174532925199432955;
+/////////////////////////////////////////////////////////
+
+Int_t GetMonitorAndDetectorLists(TString *monitorList, TString *detectorList, 
+				 Bool_t trunc, char *config){
+  string str;
+  ifstream file(config);
+
+  TChain *ch = new TChain("mps_slug");
+  ch->Add(Form("%s/mps_only_13993*.root",gSystem->Getenv("MPS_ONLY_ROOTFILES")));
+  ch->AddFriend("mps_slug",Form("%s/mps_only_friend_13993.root",
+				gSystem->Getenv("MPS_ONLY_ROOTFILES")));
+  for(int i=0;i<nMON;i++){
+    char id[4] = "   ", monitr[20] = "                   ";
+    file>>id>>monitr;
+    getline(file, str);
+    monitorList[i] = TString(monitr);
+    if(!ch->GetBranch(monitorList[i].Data())){
+      cout<<monitorList[i].Data()<<" "<<ch->GetEntries()<<" missing. Exiting.\n";
+      return -1;
+    }else{
+      if( trunc && monitorList[i].Contains("qwk_")){
+	monitorList[i].Replace(0,4,"");
+      }
+      cout<<monitorList[i].Data()<<"\n";
+    }
+  }
+  
+  getline(file, str);
+  Int_t nDet = 0;
+  for(int i=0;i<nDET&&!file.eof();i++){
+    char id[4] = "   ", detectr[20] = "                   ";
+    file>>id>>detectr;
+    getline(file, str);
+    detectorList[nDet] = TString(detectr);
+    if(!ch->GetBranch(detectorList[nDet].Data())){
+      cout<<detectorList[nDet].Data()<<" missing.\n";
+    }else{
+      if( trunc && detectorList[nDet].Contains("qwk_"))
+	detectorList[nDet].Replace(0,4,"");
+      cout<<detectorList[nDet].Data()<<endl;
+      nDet++;
+    }
+    file.peek();
+  }
+  file.close();
+  return nDet;
+}
+
+
+Int_t MakeSlopesDBFriendTreePass5c(int run_period = 1, TString stem = "", 
+				   Bool_t add_pmtavg = 0){
+
+  //Declare needed variables
+  /////////////////////////////////////////////////////////
+
+  Bool_t debug = 0;
+  Int_t nDet;
+  TString MonitorList[nMON], DetectorList[nDET];
+  TString MonitorListFull[nMON], DetectorListFull[nDET];
+  /////////////////////////////////////////////////////////
+
+
+  //Get lists of monitors and detectors
+  /////////////////////////////////////////////////////////
+  TChain *ch = new TChain("mps_slug");
+  char * configFile = Form("%s/config/setup_mpsonly%s.config",
+			   gSystem->Getenv("BMOD_SRC"), stem.Data());
+  nDet = GetMonitorAndDetectorLists(MonitorList, DetectorList,1, configFile);  
+  GetMonitorAndDetectorLists(MonitorListFull, DetectorListFull,0, configFile);  
+  if(nDet == -1){
+    cout<<"Detector list not found. Exiting.\n"<<endl;
+    return -1;
+  }
+  if(debug)std::cout<<"(4)Working.\n"; 
+  if(add_pmtavg){
+    DetectorList[nDet] = "mdallpmtavg";
+    DetectorListFull[nDet] = "mdallpmtavg";
+    ++nDet;
+  }
+  delete ch;
+  /////////////////////////////////////////////////////////
+
+
+  //get the DB rootfile
+  /////////////////////////////////////////////////////////
+  Int_t run, runlet, slug;
+  TFile *DBfile = TFile::Open(Form("%s/run%i/hydrogen_cell_reduced_tree.root", 
+				   gSystem->Getenv("DB_ROOTFILES"),
+				   run_period));
+
+  if(DBfile==0){
+    cout<<"DB rootfile not found. Exiting.\n";
+    return -1;
+  }
+  TTree *DBtree = (TTree*)DBfile->Get("reduced_tree");
+  if(DBtree->GetEntries()==0){
+    cout<<"DBtree empty. Exiting.\n";
+    return -1;
+  }
+  cout<<DBtree->GetEntries()<<" entries found in DB rootfile.\n";
+  /////////////////////////////////////////////////////////
+
+
+  //Create a new file for tree
+  /////////////////////////////////////////////////////////
+  TString slopesFileName = Form("%s/run%i/hydrogen_cell_bmod_slopes_tree"
+				"%s.root", gSystem->Getenv("DB_ROOTFILES"),
+				run_period, stem.Data());
+  TFile *slopesFile = new TFile(slopesFileName.Data(),"recreate");
+  if(!slopesFile){
+    cout<<"Slopes tree file failed to be created. Exiting.\n";
+    return -1;
+  }
+  gSystem->cd(Form("%s/run%i",gSystem->Getenv("DB_ROOTFILES"), run_period));
+  TTree *slopesTree = new TTree("slopes", "slopes"); 
+  /////////////////////////////////////////////////////////
+
+
+  //Get slopes from slopes tree
+  /////////////////////////////////////////////////////////
+  Int_t slopes_exist;
+  Double_t ***slopes, ***slopesErr, **sl, **slErr;
+  slopes = new Double_t **[nDET];
+  slopesErr = new Double_t **[nDET];
+  sl = new Double_t *[nDET];
+  slErr = new Double_t *[nDET];
+  for(int idet=0;idet<nDET;++idet){
+    slopes[idet] = new Double_t *[nMON];
+    slopesErr[idet] = new Double_t *[nMON];
+    sl[idet] = new Double_t [nMON];
+    slErr[idet] = new Double_t [nMON];
+    for(int imon=0;imon<nMON;++imon){
+      slopes[idet][imon] = new Double_t [322];
+      slopesErr[idet][imon] = new Double_t [322];
+      for(int islug=0;islug<322;++islug){
+	slopes[idet][imon][islug] = ERROR;
+	slopesErr[idet][imon][islug] = ERROR;
+      }
+    }
+  }
+  TChain *chs = new TChain("slug");
+  chs->Add("/net/data1/paschkedata1/Set11_dithering_slopes.root");
+  if(chs->GetEntries()==0){
+    cout<<"No entries in slopes tree. Exiting.\n";
+    return -1;
+  }
+  Double_t slug_d;
+  chs->SetBranchAddress("slug", &slug_d);
+  for(int idet=0;idet<nDet;++idet){
+    char *dname = (char *)DetectorListFull[idet].Data();
+    for(int imon=0;imon<nMON;++imon){
+      char *mname = (char *)MonitorList[imon].Data();
+      char *name = Form("slope_%s_%s", dname, mname);
+      cout<<"here: "<<name<<endl;
+      chs->SetBranchAddress(name, &sl[idet][imon]);
+    }
+  }
+  for(int i=0; i<chs->GetEntries();++i){
+    chs->GetEntry(i);
+    for(int idet=0;idet<nDet;++idet){
+      for(int imon=0;imon<nMON;++imon){
+	int slug_i = (int)slug_d;
+	slopes[idet][imon][slug_i] = sl[idet][imon];
+	slopesErr[idet][imon][slug_i] = 0;
+      }
+    }
+  }
+  delete chs;
+
+
+
+  //Create new slopes tree and its branches
+  /////////////////////////////////////////////////////////
+  TBranch *brSlug = slopesTree->Branch("slug", &slug, "slug/I");
+  TBranch *brRun = slopesTree->Branch("run", &run, "run/I");
+  TBranch *brRunlet = slopesTree->Branch("runlet", &runlet, "runlet/I");
+
+  TBranch *brSlopesExist = slopesTree->Branch("slopes_exist", &slopes_exist,
+					   "slopes_exist/I");
+  TBranch *brSlopes[nDET][nMON];
+  TBranch *brSlopesErr[nDET][nMON];
+  for(int idet=0;idet<nDet;idet++){
+    char *dname = (char*)DetectorList[idet].Data();
+    for(int imon=0;imon<nMON;imon++){
+      char *mname = (char*)MonitorList[imon].Data();
+      brSlopes[idet][imon] = slopesTree->Branch(Form("%s_%s",dname, mname),
+						&sl[idet][imon],
+						Form("%s_%s/D",dname, mname));	
+      brSlopesErr[idet][imon] = slopesTree->Branch(Form("%s_%s_err",dname, mname),
+						&slErr[idet][imon],
+						Form("%s_%s_err/D",dname, mname));
+      cout<<"Branch: "<<Form("%i %s_%s_err/D %s\n",imon, dname, mname, mname);
+    }
+  }
+
+  /////////////////////////////////////////////////////////
+
+
+
+
+  //Set needed branch addresses.
+  /////////////////////////////////////////////////////////
+  DBtree->ResetBranchAddresses();
+  DBtree->SetBranchAddress("slug", &slug);
+  DBtree->SetBranchAddress("run", &run);
+  DBtree->SetBranchAddress("runlet", &runlet);
+  //  DBtree->SetBranchAddress("asym_qwk_mdallbars", &asym);
+  /////////////////////////////////////////////////////////
+
+  //Get slopes from files and create tree.
+  /////////////////////////////////////////////////////////
+  for(int irnlt=0;irnlt<DBtree->GetEntries();++irnlt){
+    if(irnlt%1000==0)cout<<"Processing entry "<<irnlt<<endl;
+    DBtree->GetEntry(irnlt);
+    cout<<irnlt<<" "<<slug<<" "<<run<<" "<<runlet<<" "<<slopes[0][0][slug]<<endl;
+    slopes_exist = (slopes[0][0][slug] == ERROR ? 0 : 1); 
+    for(int idet=0;idet<nDet;idet++){
+      for(int imon=0;imon<nMON;++imon){
+	double conv = (MonitorList[imon].Contains("Slope") ? 1.0 : 1.0);
+	//cout<<idet<<" "<<imon<<" "<<slug<<" "<< slopes[idet][imon][slug]<<endl;
+	sl[idet][imon] = slopes[idet][imon][slug] * conv;
+	slErr[idet][imon] = slopesErr[idet][imon][slug];
+      }
+    }
+    slopesTree->Fill();
+  }
+  slopesFile = slopesTree->GetCurrentFile();
+  slopesFile->Write("",TObject::kOverwrite);
+  cout<<slopesTree->GetEntries()<<" entries"<<endl;
+  cout<<"Writing "<<slopesFileName.Data()<<endl;
+  slopesFile->Close();
+  return 0;
+}

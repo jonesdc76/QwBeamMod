@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash
+END
+bmod_jsub.bash
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/repos/!svn/ver/4834/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_jsub.bash
+END
+bmod_farm.bash
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/repos/!svn/ver/4834/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_farm.bash
+END
+bmod_r1p4.bash
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/repos/!svn/ver/4834/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r1p4.bash
+END
+upload_beammod_data_r1p5a.pl
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/upload_beammod_data_r1p5a.pl
+END
+bmod_r1p5.bash
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/repos/!svn/ver/4872/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r1p5.bash
+END
+bmod_cdaq.bash
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/repos/!svn/ver/4834/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_cdaq.bash
+END
+bmod_r1p5_batch.bash
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/!svn/ver/5151/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r1p5_batch.bash
+END
+bmod_r2p5_batch.bash
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/repos/!svn/ver/5322/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r2p5_batch.bash
+END
+bmod_r1p5a_batch.bash
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r1p5a_batch.bash
+END
+bmod_r1p5b.bash
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r1p5b.bash
+END
+modulation.bash
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/repos/!svn/ver/4834/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/modulation.bash
+END
+bmod_r1p5b_batch.bash
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r1p5b_batch.bash
+END
+bmod.bash
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/repos/!svn/ver/4834/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod.bash
+END
+bmod_r2p5_batch_v2.bash
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/bash/bmod_r2p5_batch_v2.bash
+END

@@ -1,0 +1,16 @@
+#include <iostream>
+
+printme::printme()
+{
+  char *fName = "me";
+}
+
+void printme::printname()
+{
+  printf("%s\n", fName);
+}
+
+void setname(char *nm)
+{
+  fName = nm; 
+}

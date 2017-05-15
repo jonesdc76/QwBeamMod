@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/perl
+END
+submit_analysis.pl
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/repos/!svn/ver/5388/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/perl/submit_analysis.pl
+END
+qw_jsub_bm.pl
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/repos/!svn/ver/5151/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/perl/qw_jsub_bm.pl
+END
+bmod_sub.pl
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/repos/!svn/ver/4834/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/perl/bmod_sub.pl
+END
+analysis_check.pl
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/repos/!svn/ver/6110/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/perl/analysis_check.pl
+END
+slug_sub.pl
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/repos/!svn/ver/4880/QwAnalysis/trunk/Extensions/Regression/QwBeamModulation/scripts/perl/slug_sub.pl
+END
